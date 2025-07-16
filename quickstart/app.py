@@ -8,6 +8,7 @@ db=SQLAlchemy(app)
 class Task(db.Model):
     id=db.Column(db.Integer,primary_key=True)
     content=db.Column(db.String(200),nullable=False)
+    done=db.Column(db.Boolean,default=False)
 
 
 @app.route('/',methods=['GET','POST']) 
@@ -29,5 +30,22 @@ def delete(id):
     db.session.commit()    
     return redirect('/')
 
+@app.route('/update/<int:id>',methods=['GET','POST'])
+def update(id):
+    task=Task.query.get_or_404(id)
+    if request.method=='POST':
+        task.content=request.form['content']
+        db.session.commit()
+        return redirect('/')
+    else:
+        return render_template('update.html',task=task)
+    
+@app.route('/complete/<int:id>')
+def complete(id):
+    task=Task.query.get_or_404(id)
+    task.done=not task.done
+    db.session.commit()
+    return redirect('/')
+
 if __name__=="__main__":
-   app.run(debug=True)
+   app.run()
